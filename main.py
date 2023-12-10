@@ -3,12 +3,13 @@ import requests
 from bs4 import BeautifulSoup
 from pprint import pprint
 import time
+import pandas as pd
 
 # 事前準備
 url = 'https://suumo.jp/chintai/tokyo/sc_koto/?page={}'
 d_list = []
 
-for i in range(1,14):
+for i in range(1,4):
     print(len(d_list))
     target_url = url.format(i)
     r = requests.get(target_url)
@@ -45,5 +46,6 @@ for i in range(1,14):
             }
             d_list.append(d)
 
-pprint(d_list[-1])
+df = pd.DataFrame(d_list)
+print(df.head(5))
 
