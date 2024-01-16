@@ -1,0 +1,11 @@
+requests
+beautifulsoup4
+pandas
+streamlit
+tqdm
+gspread
+oauth2client
+sqlite3
+oauth2client.service_account
+
+
