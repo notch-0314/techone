@@ -1,51 +1,21 @@
-
-import requests
-from bs4 import BeautifulSoup
-from pprint import pprint
-import time
+import streamlit as st
+import sqlite3
 import pandas as pd
 
-# 事前準備
-url = 'https://suumo.jp/chintai/tokyo/sc_koto/?page={}'
-d_list = []
+# データを取得してdf_dbに格納
+db_path = 'techone_2.db'
+conn = sqlite3.connect(db_path)
+query = 'SELECT * FROM techone_scraped WHERE scraped_date_time = (SELECT MAX(scraped_date_time) FROM techone_scraped);'
+df_db = pd.read_sql_query(query, conn)
+print(df_db)
+conn.close()
 
-for i in range(1,4):
-    print(len(d_list))
-    target_url = url.format(i)
-    r = requests.get(target_url)
-    time.sleep(1)
-    soup = BeautifulSoup(r.text,"html.parser")
-    
-    contents = soup.find_all('div', class_='cassetteitem')
 
-    for content in contents:
-        detail = content.find('div', class_='cassetteitem-detail')
-        table = content.find('table', class_='cassetteitem_other')
-        title = detail.find('div', class_='cassetteitem_content-title').text
-        address = detail.find('li', class_='cassetteitem_detail-col1').text
-        access = detail.find('li', class_='cassetteitem_detail-col2').text
-        age = detail.find('li', class_='cassetteitem_detail-col3').text
-        trtags = table.find_all('tr', class_='js-cassette_link')
-        for trtag in trtags:
-            floor, price, first_fee, capacity = trtag.find_all('td')[2:6]
-            fee, management_fee = price.find_all('li')
-            deposit, gratuity = first_fee.find_all('li')
-            madori, menseki = capacity.find_all('li')
-            d = {
-                'title': title,
-                'address': address,
-                'access': access,
-                'age': age,
-                'floor': floor.text,
-                'fee': fee.text,
-                'management_fee': management_fee.text,
-                'deposit': deposit.text,
-                'gratuity': gratuity.text,
-                'madori': madori.text,
-                'menseki': menseki.text,
-            }
-            d_list.append(d)
+area = st.sidebar.multiselect('エリア', ['千代田区', '中央区', '江東区'])
+station = st.sidebar.multiselect('駅名', ['渋谷駅', '新宿駅', '東京駅'])
+fee = st.sidebar.slider('家賃', value=[100000, 150000], min_value=30000, max_value=300000)
+st.sidebar.button('検索する', type='primary')
 
-df = pd.DataFrame(d_list)
-print(df.head(5))
+st.dataframe(df_db, hide_index=True, use_container_width=True)
+
 
