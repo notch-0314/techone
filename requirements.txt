@@ -5,6 +5,5 @@ streamlit
 tqdm
 gspread
 oauth2client
-oauth2client.service_account
 
 
