@@ -5,7 +5,7 @@ import pandas as pd
 # データを取得してdf_dbに格納
 db_path = 'techone_2.db'
 conn = sqlite3.connect(db_path)
-query = 'SELECT * FROM techone_scraped WHERE scraped_date_time = (SELECT MAX(scraped_date_time) FROM techone_scraped);'
+query = 'SELECT * FROM techone_db WHERE scraped_date_time = (SELECT MAX(scraped_date_time) FROM techone_db);'
 df_db = pd.read_sql_query(query, conn)
 print(df_db)
 conn.close()
