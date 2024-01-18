@@ -7,6 +7,9 @@ on:
     - cron: '30 3 * * *'
     - cron: '0 5 * * *'
     - cron: '0 8 * * *'
+    - cron: '0 9 * * *'
+    - cron: '30 9 * * *'
+    - cron: '0 10 * * *'
     - cron: '0 14 * * *'
   
 jobs:
@@ -37,3 +40,11 @@ jobs:
         run: |
           # 定期実行するファイルを指定。・・・③
           python scraping.py
+
+      - name: Commit and push if there are changes
+        run: |
+          git config --global user.name 'notch-0314'
+          git config --global user.email 'r.yosuke.inoue0314@gmail.com'
+          git add -A
+          git commit -m 'Update database' || exit 0  # コミットがなければ終了
+          git push
