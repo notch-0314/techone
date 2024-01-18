@@ -10,6 +10,7 @@ on:
     - cron: '0 9 * * *'
     - cron: '30 9 * * *'
     - cron: '0 10 * * *'
+    - cron: '30 13 * * *'
     - cron: '0 14 * * *'
   
 jobs:
@@ -47,4 +48,5 @@ jobs:
           git config --global user.email 'r.yosuke.inoue0314@gmail.com'
           git add -A
           git commit -m 'Update database' || exit 0  # コミットがなければ終了
+          git remote set-url origin https://${{ secrets.GH_TOKEN }}@github.com/notch-0314/techone.git
           git push
