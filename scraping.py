@@ -50,9 +50,9 @@ def extract_number(text, return_type=float):
 
 # Airdoorデータ取得
 d_list = []
-url = 'https://airdoor.jp/list?si=d-131083&p={}'
+url = 'https://airdoor.jp/list?si=d-131016-131024-131032-131041-131059-131067-131075-131083-131091-131105-131113-131121-131130-131148-131156-131164-131172-131181-131199-131202-131211-131229-131237&p={}'
 
-for i in tqdm(range(1,15)):
+for i in tqdm(range(1,150)):
     target_url = url.format(i)
     r = requests.get(target_url)
     time.sleep(1) # 1秒ずつ
