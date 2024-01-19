@@ -167,10 +167,16 @@ df_db_1.rename(columns={'scraped_date_time': 'scraped_date_time_last_time'}, inp
 
 # df_db_1にあってdf_scrapedにない部屋を抽出してdf_uniqueに入れる
 df_merged = pd.merge(df_db_1, df_scraped[['title', 'address', 'room_number', 'scraped_date_time']], on=['title', 'address', 'room_number'], how='left', indicator=True)
+
+# scraped_date_timeのすべてに日時を入れる
+latest_scraped_time = df_merged['scraped_date_time'].dropna().unique()[0]
+df_merged['scraped_date_time'] = df_merged['scraped_date_time'].fillna(latest_scraped_time)
+
 df_unique = df_merged[df_merged['_merge']=='left_only']
 
 # 直近、いつ、どのマンションの部屋が何部屋減ったかを表示するdf_sold_last_timeを作成
 df_sold_last_time = df_unique.groupby(['title', 'address', 'scraped_date_time']).size().reset_index(name='count')
+df_sold_last_time.shape
 
 
 
@@ -191,7 +197,6 @@ conn.close()
 
 # title、addressをキーにcountを合計
 df_sold_total_count = df_sold_all_time.groupby(['title', 'address'])['count'].sum().reset_index(name='total_count')
-df_sold_total_count
 
 
 # In[57]:
