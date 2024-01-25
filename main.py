@@ -5,7 +5,7 @@ import pandas as pd
 # ページ設定を行う
 st.set_page_config(layout="wide")
 
-selected_areas = st.sidebar.multiselect('エリア', ['足立区','墨田区','荒川区','世田谷区','板橋区','台東区','江戸川区','千代田区','大田区','中央区','葛飾区','豊島区','北区','中野区','江東区','練馬区','品川区','文京区','渋谷区','港区','新宿区','目黒区','杉並区'], placeholder='エリアを選択')
+selected_areas = st.sidebar.multiselect('エリア', ['中央区','渋谷区','港区','新宿区','江東区','足立区','墨田区','荒川区','世田谷区','板橋区','台東区','江戸川区','千代田区','大田区','葛飾区','豊島区','北区','中野区','練馬区','品川区','文京区','目黒区','杉並区'], placeholder='エリアを選択')
 selected_stations = st.sidebar.multiselect('駅名', ['新宿駅', '東京駅', '渋谷駅', '池袋駅', '上野駅', '新橋駅', '日暮里駅', '飯田橋駅', '品川駅', '四ツ谷駅', '市ヶ谷駅', '北千住駅', '秋葉原駅', '御徒町駅', '神田駅', '大手町駅', '永田町駅', '代々木駅', '御茶ノ水駅', '荻窪駅', '赤羽駅'
 ], placeholder='最寄りの駅名を選択')
 selected_minutes = st.sidebar.selectbox('徒歩分数', ['5分以内', '10分以内', '15分以内', '20分以内'], placeholder='徒歩分数を選択', index=2)
@@ -97,12 +97,13 @@ if search_button:
 if not st.session_state['search_button_clicked']:
     col1, col2 = st.columns(2)
     with col1:    
-        st.subheader('物件探しをもっと効率的に')
-        st.header('おとり物件のない最新データから今人気の物件を計算')
+        st.subheader('すぐ埋まる人気物件が一目でわかる！')
+        st.title('人気マンションレーダー')
+        st.write('')
         st.write('')
         st.markdown('**📈 最新データを使用して物件数が減少中のマンションを探せる**')
         st.write('**🔍 おとり物件・重複なしの物件が探せる**')
-        st.write('**💰 仲介手数料が安い物件が豊富**')
+        st.write('**💰 仲介手数料が安い物件も一目でわかる**')
     with col2:
         st.image('topimage.png', width=400)
     st.error('**👈👈 気になる条件を入れて検索してみよう**')
