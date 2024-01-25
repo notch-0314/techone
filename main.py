@@ -5,9 +5,12 @@ import pandas as pd
 # ページ設定を行う
 st.set_page_config(layout="wide")
 
-selected_areas = st.sidebar.multiselect('エリア', ['足立区','墨田区','荒川区','世田谷区','板橋区','台東区','江戸川区','千代田区','大田区','中央区','葛飾区','豊島区','北区','中野区','江東区','練馬区','品川区','文京区','渋谷区','港区','新宿区','目黒区','杉並区'])
-selected_stations = st.sidebar.multiselect('駅名', ['渋谷駅', '新宿駅', '東京駅'])
-selected_fee = st.sidebar.slider('家賃', value=[50000, 250000], min_value=30000, max_value=300000)
+selected_areas = st.sidebar.multiselect('エリア', ['足立区','墨田区','荒川区','世田谷区','板橋区','台東区','江戸川区','千代田区','大田区','中央区','葛飾区','豊島区','北区','中野区','江東区','練馬区','品川区','文京区','渋谷区','港区','新宿区','目黒区','杉並区'], placeholder='エリアを選択')
+selected_stations = st.sidebar.multiselect('駅名', ['新宿駅', '東京駅', '渋谷駅', '池袋駅', '上野駅', '新橋駅', '日暮里駅', '飯田橋駅', '品川駅', '四ツ谷駅', '市ヶ谷駅', '北千住駅', '秋葉原駅', '御徒町駅', '神田駅', '大手町駅', '永田町駅', '代々木駅', '御茶ノ水駅', '荻窪駅', '赤羽駅'
+], placeholder='最寄りの駅名を選択')
+selected_minutes = st.sidebar.selectbox('徒歩分数', ['5分以内', '10分以内', '15分以内', '20分以内'], placeholder='徒歩分数を選択', index=2)
+selected_madori = st.sidebar.multiselect('間取り', ['1R', '1K', '1DK', '1LDK', '2LDK', '3LDK'], placeholder='間取りを選択')
+selected_fee = st.sidebar.slider('家賃（万）', value=[5, 25], min_value=5, max_value=50, step=5)
 search_button = st.sidebar.button('検索する', type='primary')
 options = ['人気度⭐⭐⭐以上', '人気度⭐⭐以上', '人気度⭐以上', 'すべて']
 
@@ -39,10 +42,14 @@ def filter_dataframe(criteria):
     :return: フィルタリングされたデータフレーム
     """
     df = st.session_state['df_all']
-    if criteria['selected_areas']:
+    if 'selected_areas' in criteria and criteria['selected_areas']:
         df = df[df['address'].apply(lambda x: any(area in x for area in criteria['selected_areas']))]
+    if 'selected_stations' in criteria and criteria['selected_stations']:
+        df = df[df['access1_2'].apply(lambda x: any(area in x for area in criteria['selected_stations']))]
+    if 'selected_madori' in criteria and criteria['selected_madori']:
+        df = df[df['madori'].apply(lambda x: any(area in x for area in criteria['selected_madori']))]
 
-    df = df[df['fee'].between(criteria['selected_fee'][0]/10000, criteria['selected_fee'][1]/10000)]
+    df = df[df['fee'].between(criteria['selected_fee'][0], criteria['selected_fee'][1])]
 
     # 他の検索条件に基づくフィルタリングもここに追加
     # 欠損値（null）を0で埋める
@@ -51,6 +58,9 @@ def filter_dataframe(criteria):
     if df['evaluation_score'].dtype == object:
         df['evaluation_score'] = pd.to_numeric(df['evaluation_score'], errors='coerce')
     df = df[df['evaluation_score']>=criteria['selected_evaluation_score']]
+    if df['access1_3'].dtype == object:
+        df['access1_3'] = pd.to_numeric(df['access1_3'], errors='coerce').fillna(0).astype(int)
+    df = df[df['access1_3']<=criteria['selected_minutes']]
 
     return df
 
@@ -61,17 +71,42 @@ if search_button:
     st.session_state['search_button_clicked'] = True
 
     st.session_state['search_criteria'] = {
-        'selected_areas': selected_areas,
         'selected_fee': selected_fee,
         # 他の検索条件もここに追加
         'selected_evaluation_score': 0
     }
+    if selected_minutes == '5分以内':
+        st.session_state['search_criteria']['selected_minutes'] = 5
+    if selected_minutes == '10分以内':
+        st.session_state['search_criteria']['selected_minutes'] = 10
+    if selected_minutes == '15分以内':
+        st.session_state['search_criteria']['selected_minutes'] = 15
+    if selected_minutes == '20分以内':
+        st.session_state['search_criteria']['selected_minutes'] = 20
+
+    if selected_areas:
+        st.session_state['search_criteria']['selected_areas'] = selected_areas
+    if selected_stations:
+        st.session_state['search_criteria']['selected_stations'] = selected_stations
+    if selected_madori:
+        st.session_state['search_criteria']['selected_madori'] = selected_madori
     criteria = st.session_state['search_criteria']
     st.session_state['df_filtered'] = filter_dataframe(criteria)
 
 # 初期画面（検索ボタン未クリック）
 if not st.session_state['search_button_clicked']:
-    st.image('topimage.jpg')
+    col1, col2 = st.columns(2)
+    with col1:    
+        st.subheader('物件探しをもっと効率的に')
+        st.header('おとり物件のない最新データから今人気の物件を計算')
+        st.write('')
+        st.markdown('**📈 最新データを使用して物件数が減少中のマンションを探せる**')
+        st.write('**🔍 おとり物件・重複なしの物件が探せる**')
+        st.write('**💰 仲介手数料が安い物件が豊富**')
+    with col2:
+        st.image('topimage.png', width=400)
+    st.error('**👈👈 気になる条件を入れて検索してみよう**')
+
 
 if st.session_state['search_button_clicked']:
     col1, col2 = st.columns(2)
@@ -80,12 +115,12 @@ if st.session_state['search_button_clicked']:
     with col2:
         with st.expander("人気度とは？"):
             st.write("""
-                マンションごとに最近の販売状況を表したスコアです。
-                最近1ヶ月で販売があればスコアがつき、
-                スコアがついた中でも上位60%以上の販売数のマンションには人気度⭐⭐、
-                上位30%以上の販売数のマンションには人気度⭐⭐⭐ がついています。
+                マンションごとに最近の契約状況を表したスコアです。
+                最近1ヶ月で契約があればスコアがつき、
+                スコアがついた中でも上位60%以上の契約数のマンションには人気度⭐⭐、
+                上位30%以上の契約数のマンションには人気度⭐⭐⭐ がついています。
             """)
-    selected_dataset = st.selectbox('', options, index=2)
+    selected_dataset = st.selectbox('', options, index=2, label_visibility='collapsed')
     if selected_dataset == '人気度⭐⭐⭐以上':
         st.session_state['search_criteria']['selected_evaluation_score'] = 3
     if selected_dataset == '人気度⭐⭐以上':
@@ -96,7 +131,7 @@ if st.session_state['search_button_clicked']:
         st.session_state['search_criteria']['selected_evaluation_score'] = 0
     criteria = st.session_state['search_criteria']
     st.session_state['df_filtered'] = filter_dataframe(criteria)
-    df_limit = st.session_state['df_filtered'].head(50)
+    df_limit = st.session_state['df_filtered'].sort_values(by='total_sold_count', ascending=False).head(300)
     if len(df_limit) == 0:
         st.error('検索結果はありません。別の検索をお試しください。')
     else:
@@ -158,7 +193,7 @@ if st.session_state['search_button_clicked']:
         # apply関数を使用して行ごとにカスタム関数を適用
         df_limit['deposit_text'] = df_limit.apply(format_deposit_and_gratuity, axis=1)
         df_limit['access_1_station'] = df_limit['access1_1'] + ' ' +df_limit['access1_2']
-        df_limit['access_1_time'] = '徒歩' + df_limit['access1_3'] + '分'
+        df_limit['access_1_time'] = '徒歩' + df_limit['access1_3'].astype(str) + '分'
         df_limit = df_limit[['checked', 'good_point', 'title', 'total_sold_count_text', 'total_fee_text', 'deposit_text', 'madori', 'access_1_station', 'access_1_time', 'evaluation_score_text', 'address']]
         df_display = st.data_editor(
             df_limit,

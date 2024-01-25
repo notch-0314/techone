@@ -51,7 +51,7 @@ def extract_number(text, return_type=float):
 d_list = []
 url = 'https://airdoor.jp/list?si=d-131016-131024-131032-131041-131059-131067-131075-131083-131091-131105-131113-131121-131130-131148-131156-131164-131172-131181-131199-131202-131211-131229-131237&p={}'
 
-for i in tqdm(range(1,350)):
+for i in tqdm(range(1,200)):
     target_url = url.format(i)
     r = requests.get(target_url)
     time.sleep(1) # 1秒ずつ
@@ -201,15 +201,11 @@ df_sold_total_count = df_sold_all_time.groupby(['title', 'address'])['count'].su
 
 # In[57]:
 
-
-# 最大値を3で割り、値が0から1/3であれば1…と条件をつけ、 evaluation カラムを作成して代入
-max_total_count = df_sold_total_count['total_count'].max()
-
 # 条件を設定
 conditions = [
-    df_sold_total_count['total_count'] < max_total_count/3,  # 最大値の1/3以下
-    (max_total_count/3 <= df_sold_total_count['total_count']) & (df_sold_total_count['total_count'] < max_total_count*2/3),  # 最大値の1/3を超え、2/3未満
-    df_sold_total_count['total_count'] >= max_total_count*2/3  # 最大値の2/3以上
+    df_sold_total_count['total_count'] < 5,  # 最大値の1/3以下
+    (5 <= df_sold_total_count['total_count']) & (df_sold_total_count['total_count'] < 10),  # 最大値の1/3を超え、2/3未満
+    df_sold_total_count['total_count'] >= 10  # 最大値の2/3以上
 ]
 # 各条件に対する値を設定
 values = [1, 2, 3]
